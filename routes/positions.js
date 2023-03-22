@@ -63,7 +63,7 @@ router.get('/:id', async (req, res) => {
 });
 
 router.put('/:id', async (req, res) => {
-    let position = new Position({
+    let position = {
         id: req.params.id,
         workplaceId: req.id,
         positionName: req.body.positionName,
@@ -72,9 +72,9 @@ router.put('/:id', async (req, res) => {
         description: req.body.description,
         requirements: req.body.requirements,
         salary: req.body.salary
-    });
+    };
 
-    await Position.findOneAndUpdate({ workplaceId: req.id, id: req.params.id }, position, { new: true }).then(result => {
+    await Position.findOneAndUpdate({ id: req.params.id, workplaceId: req.id }, position, { new: true }).then(result => {
         if (result !== null) {
             res.status(200);
             res.location(`http://localhost:80/workplaces/${req.id}/positions/${req.params.id}`);
