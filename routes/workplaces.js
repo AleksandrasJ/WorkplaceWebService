@@ -28,16 +28,16 @@ router.post('/', async (req, res) => {
 
     let workplace = new Workplace({
         _id: lastID + 1,
-        companyName: req.body.companyName,
-        description: req.body.description,
-        industry: req.body.industry,
-        website: req.body.website,
-        specialities: req.body.specialities
+        companyName: req.body.companyName || "",
+        description: req.body.description || "",
+        industry: req.body.industry || "",
+        website: req.body.website || "",
+        specialities: req.body.specialities || []
     });
 
     await workplace.save().then(result => {
         res.status(201);
-        res.location(`http://localhost:80/workplaces/${workplace._id}`);
+        res.location(`workplaces/${workplace._id}`);
         res.send(result);
     }).catch(err => {
         res.status(500);
@@ -73,7 +73,7 @@ router.put('/:id', async (req, res) => {
     await Workplace.findOneAndUpdate({ _id: req.params.id }, workplace, { new: true }).then(result => {
         if (result !== null) {
             res.status(200);
-            res.location(`http://localhost:80/workplaces/${req.params.id}`);
+            res.location(`/workplaces/${req.params.id}`);
             res.send(result);
         } else {
             res.status(404);

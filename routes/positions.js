@@ -26,20 +26,32 @@ router.post('/', async (req, res) => {
         lastID = 0;
     });
 
+    let overallID = 0;
+    await Position.findOne().sort({ _id: -1 }).limit(1).then(result => {
+        overallID = result.toJSON()._id;
+        console.log(result);
+        console.log(overallID);
+    }).catch(err => {
+        overallID = 0;
+    });
+
     let position = new Position({
+        _id: overallID + 1,
         id: lastID + 1,
         workplaceId: req.id,
-        positionName: req.body.positionName,
-        location: req.body.location,
-        workTimeNorm: req.body.workTimeNorm,
-        description: req.body.description,
-        requirements: req.body.requirements,
-        salary: req.body.salary
+        positionName: req.body.positionName || "",
+        location: req.body.location || "",
+        workTimeNorm: req.body.workTimeNorm || "",
+        description: req.body.description || "",
+        requirements: req.body.requirements || [],
+        salary: req.body.salary || 0
     });
+
+    console.log(position);
 
     await position.save().then(result => {
         res.status(201);
-        res.location(`http://localhost:80/workplaces/${req.params.id}/positions/${position._id}`);
+        res.location(`/workplaces/${req.params.id}/positions/${position._id}`);
         res.send(result);
     }).catch(err => {
         res.status(500);
@@ -64,8 +76,6 @@ router.get('/:id', async (req, res) => {
 
 router.put('/:id', async (req, res) => {
     let position = {
-        id: req.params.id,
-        workplaceId: req.id,
         positionName: req.body.positionName,
         location: req.body.location,
         workTimeNorm: req.body.workTimeNorm,
@@ -77,7 +87,7 @@ router.put('/:id', async (req, res) => {
     await Position.findOneAndUpdate({ id: req.params.id, workplaceId: req.id }, position, { new: true }).then(result => {
         if (result !== null) {
             res.status(200);
-            res.location(`http://localhost:80/workplaces/${req.id}/positions/${req.params.id}`);
+            res.location(`/workplaces/${req.id}/positions/${req.params.id}`);
             res.send(result);
         } else {
             res.status(404);

@@ -8,10 +8,11 @@ services:
     depends_on:
       - mongo
   mongo:
-    image: mongo:4.4.6
+    image: mongo
     ports:
       - "27017:27017"
-
+    volumes:
+      - database:/data/db
 volumes:
   database:
 
