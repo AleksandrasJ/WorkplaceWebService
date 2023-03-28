@@ -1,5 +1,5 @@
 import express from 'express';
-import { Workplace } from '../tools/database.js';
+import { Position, Workplace } from '../tools/database.js';
 
 const router = express.Router();
 
@@ -86,6 +86,7 @@ router.put('/:id', async (req, res) => {
 });
 
 router.delete('/:id', async (req, res) => {
+    let length = 0;
     await Workplace.findOneAndRemove({ _id: req.params.id }).then(result => {
         if (result) {
             res.status(204);
@@ -98,6 +99,13 @@ router.delete('/:id', async (req, res) => {
         res.status(500);
         res.send('<h1>Failed to collect data from the database for deletion!</h1>');
     });
+    await Position.find({ workplaceId: req.params.id }).then(result => {
+        length = result.length;
+    });
+
+    for (let i = 0; i < length; ++i) {
+        await Position.findOneAndRemove({ workplaceId: req.params.id });
+    }
 });
 
 export default router;
