@@ -1,8 +1,8 @@
 import mongoose from "mongoose";
 
 const { Schema } = mongoose;
-// Localhost pakeist i mongo
-mongoose.connect('mongodb://localhost:27017/jobs', { useNewUrlParser: true, useUnifiedTopology: true })
+
+mongoose.connect('mongodb://mongo:27017/jobs', { useNewUrlParser: true, useUnifiedTopology: true })
     .then(() => console.log('Connected to database succesfully!'))
     .catch((err) => {
         console.log('Failed to connect to database!');
