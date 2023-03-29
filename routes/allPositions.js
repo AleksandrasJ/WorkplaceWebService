@@ -20,7 +20,6 @@ router.get('/', async (req, res) => {
 
 router.get('/:id', async (req, res) => {
     await Position.findOne({ _id: req.params.id }).then(result => {
-        console.log(result);
         if (result !== null) {
             res.status(200);
             res.send(result);
