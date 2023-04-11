@@ -1,5 +1,6 @@
 import express from 'express';
 import { Position } from '../tools/database.js';
+import errorTemplate from '../tools/error.js';
 
 const router = express.Router();
 
@@ -10,11 +11,11 @@ router.get('/', async (req, res) => {
             res.send(results);
         } else {
             res.status(404);
-            res.send('<h1>No positions found!</h1>');
+            res.send(errorTemplate(404, 'No positions found!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -29,8 +30,6 @@ router.post('/', async (req, res) => {
     let overallID = 0;
     await Position.findOne().sort({ _id: -1 }).limit(1).then(result => {
         overallID = result.toJSON()._id;
-        console.log(result);
-        console.log(overallID);
     }).catch(err => {
         overallID = 0;
     });
@@ -47,16 +46,19 @@ router.post('/', async (req, res) => {
         salary: req.body.salary || 0
     });
 
-    console.log(position);
-
-    await position.save().then(result => {
-        res.status(201);
-        res.location(`/workplaces/${req.params.id}/positions/${position._id}`);
-        res.send(result);
-    }).catch(err => {
-        res.status(500);
-        res.send(`<h1>Failed to insert data into the database!\n${err}</h1>`);
-    });
+    if (!position.validateSync()) {
+        await position.save().then(result => {
+            res.status(201);
+            res.location(`/workplaces/${req.params.id}/positions/${position._id}`);
+            res.send(result);
+        }).catch(err => {
+            res.status(500);
+            res.send(errorTemplate(500, 'Failed to collect data!'));
+        });
+    } else {
+        res.status(400);
+        res.send(errorTemplate(400, 'To create resource position name is needed!'));
+    }
 });
 
 router.get('/:id', async (req, res) => {
@@ -66,11 +68,11 @@ router.get('/:id', async (req, res) => {
             res.send(result);
         } else {
             res.status(404);
-            res.send('<h1>No position found</h1>');
+            res.send(errorTemplate(404, 'No position found!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -91,11 +93,11 @@ router.put('/:id', async (req, res) => {
             res.send(result);
         } else {
             res.status(404);
-            res.send('<h1>No position found to update!</h1>');
+            res.send(errorTemplate(404, 'No position found for update!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database for update!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -106,12 +108,22 @@ router.delete('/:id', async (req, res) => {
             res.send('');
         } else {
             res.status(404);
-            res.send('<h1>No position found for deletion!</h1>');
+            res.send(errorTemplate(404, 'No position found for deletion!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database for deletion!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
+});
+
+router.all('/', (req, res) => {
+    res.status(405);
+    res.send(errorTemplate(405, 'Method not allowed!'));
+});
+
+router.all('/:id', (req, res) => {
+    res.status(405);
+    res.send(errorTemplate(405, 'Method not allowed!'));
 });
 
 export default router;

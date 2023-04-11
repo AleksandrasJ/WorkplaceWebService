@@ -12,18 +12,25 @@ mongoose.connect('mongodb://mongo:27017/jobs', { useNewUrlParser: true, useUnifi
 
 const workplaceSchema = new Schema({
     _id: Number,
-    companyName: String,
+    companyName: {
+        type: String,
+        required: true
+    },
     description: String,
     industry: String,
     website: String,
-    specialities: [String]
+    specialities: [String],
+    refPositions: String
 });
 
 const positionSchema = new Schema({
     _id: Number,
     id: Number,
     workplaceId: Number,
-    positionName: String,
+    positionName: {
+        type: String,
+        required: true
+    },
     location: String,
     workTimeNorm: String,
     description: String,
@@ -37,19 +44,23 @@ const Position = mongoose.model('Position', positionSchema);
 await Workplace.insertMany([
     {
         _id: 1, companyName: "Teltonika", description: "Easy Key to IoT", industry: "Telecommunications",
-        website: "http://www.teltonika.lt", specialities: ["Transport telematics", "Integrated solutions", "Fleet management"]
+        website: "http://www.teltonika.lt", specialities: ["Transport telematics", "Integrated solutions", "Fleet management"],
+        refPositions: "/workplaces/1/positions"
     },
     {
         _id: 2, companyName: "Swedbank", description: "Financial Services", industry: "Financial Services",
-        website: "http://www.swedbank.com", specialities: ["Financial services", "Mortgage lending", "Private banking"]
+        website: "http://www.swedbank.com", specialities: ["Financial services", "Mortgage lending", "Private banking"],
+        refPositions: "/workplaces/2/positions"
     },
     {
         _id: 3, companyName: "Lietuvos Geležinkeliai", description: "LTG yra krovinių ir keleivių vežimo bei viešosios geležinkelių infrastruktūros valdymo įmonių grupė",
-        industry: "Rail Transportation", website: "http://www.litrail.lt", specialities: ["manage (maintain, renew) public railway infrastruture", "ensure positive return on equity"]
+        industry: "Rail Transportation", website: "http://www.litrail.lt", specialities: ["manage (maintain, renew) public railway infrastruture", "ensure positive return on equity"],
+        refPositions: "/workplaces/3/positions"
     },
     {
         _id: 4, companyName: "Revolut", description: "One app, all things money", industry: "Financial Services",
-        website: "https://www.revolut.com", specialities: ["Mobile Banking", "Card Payments", "Money Remittance"]
+        website: "https://www.revolut.com", specialities: ["Mobile Banking", "Card Payments", "Money Remittance"],
+        refPositions: "/workplaces/4/positions"
     }
 
 ]).then(result => {

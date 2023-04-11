@@ -1,5 +1,6 @@
 import express from 'express';
 import { Position, Workplace } from '../tools/database.js';
+import errorTemplate from '../tools/error.js';
 
 const router = express.Router();
 
@@ -10,11 +11,11 @@ router.get('/', async (req, res) => {
             res.send(results);
         } else {
             res.status(404);
-            res.send('<h1>No workplaces found!</h1>');
+            res.send(errorTemplate(404, 'No workplaces found!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -32,17 +33,23 @@ router.post('/', async (req, res) => {
         description: req.body.description || "",
         industry: req.body.industry || "",
         website: req.body.website || "",
-        specialities: req.body.specialities || []
+        specialities: req.body.specialities || [],
+        refPositions: `/workplaces/${lastID + 1}/positions`
     });
 
-    await workplace.save().then(result => {
-        res.status(201);
-        res.location(`workplaces/${workplace._id}`);
-        res.send(result);
-    }).catch(err => {
-        res.status(500);
-        res.send(`<h1>Failed to insert data into the database!\n${err}</h1>`);
-    });
+    if (!workplace.validateSync()) {
+        await workplace.save().then(result => {
+            res.status(201);
+            res.location(`workplaces/${workplace._id}`);
+            res.send(result);
+        }).catch(err => {
+            res.status(500);
+            res.send(errorTemplate(500, 'Failed to collect data!'));
+        });
+    } else {
+        res.status(400);
+        res.send(errorTemplate(400, 'To create resource compnay name is needed!'));
+    }
 });
 
 router.get('/:id', async (req, res) => {
@@ -52,11 +59,11 @@ router.get('/:id', async (req, res) => {
             res.send(result);
         } else {
             res.status(404);
-            res.send('<h1>No workplace found</h1>');
+            res.send(errorTemplate(404, 'No workplaces found!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -77,11 +84,11 @@ router.put('/:id', async (req, res) => {
             res.send(result);
         } else {
             res.status(404);
-            res.send('<h1>No workplace found to update!</h1>');
+            res.send(errorTemplate(404, 'No workplaces found for updation!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database for update!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
 });
 
@@ -93,11 +100,11 @@ router.delete('/:id', async (req, res) => {
             res.send('');
         } else {
             res.status(404);
-            res.send('<h1>No workplace found for deletion!</h1>');
+            res.send(errorTemplate(404, 'No workplaces found for deletion!'));
         }
     }).catch(err => {
         res.status(500);
-        res.send('<h1>Failed to collect data from the database for deletion!</h1>');
+        res.send(errorTemplate(500, 'Failed to collect data!'));
     });
     await Position.find({ workplaceId: req.params.id }).then(result => {
         length = result.length;
@@ -106,6 +113,16 @@ router.delete('/:id', async (req, res) => {
     for (let i = 0; i < length; ++i) {
         await Position.findOneAndRemove({ workplaceId: req.params.id });
     }
+});
+
+router.all('/', (req, res) => {
+    res.status(405);
+    res.send(errorTemplate(405, 'Method not allowed!'));
+});
+
+router.all('/:id', (req, res) => {
+    res.status(405);
+    res.send(errorTemplate(405, 'Method not allowed!'));
 });
 
 export default router;
