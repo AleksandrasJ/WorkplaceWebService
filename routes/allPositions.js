@@ -5,10 +5,17 @@ import errorTemplate from '../tools/error.js';
 const router = express.Router();
 
 router.get('/', async (req, res) => {
+    let positionsArray = [];
     await Position.find().then(results => {
         if (results.length > 0) {
             res.status(200);
-            res.send(results);
+            for (let i = 0; i < results.length; ++i) {
+                let result = results[i].toJSON();
+                delete result.id;
+                delete result.__v;
+                positionsArray.push(result);
+            }
+            res.send(positionsArray);
         } else {
             res.status(404);
             res.send(errorTemplate(404, 'No positions found!'));
@@ -23,6 +30,9 @@ router.get('/:id', async (req, res) => {
     await Position.findOne({ _id: req.params.id }).then(result => {
         if (result !== null) {
             res.status(200);
+            result = result.toJSON();
+            delete result.id;
+            delete result.__v;
             res.send(result);
         } else {
             res.status(404);
