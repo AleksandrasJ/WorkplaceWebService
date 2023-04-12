@@ -57,7 +57,7 @@ router.post('/', async (req, res) => {
         });
     } else {
         res.status(400);
-        res.send(errorTemplate(400, 'To create resource position name is needed!'));
+        res.send(errorTemplate(400, 'To create resource positionName is needed!'));
     }
 });
 
